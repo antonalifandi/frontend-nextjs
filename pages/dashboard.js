@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import EditUserModal from './form-edit-user';
+import Swal from 'sweetalert2';
 
 const Dashboard = () => {
   const router = useRouter();
@@ -31,6 +32,40 @@ const Dashboard = () => {
   const handleSave = async (updatedUser) => {
     console.log('Updating user:', updatedUser);
     fetchUsers();
+  };
+
+  const handleDelete = async (userId) => {
+    const result = await Swal.fire({
+      title: 'Apakah Anda yakin?',
+      text: "Anda tidak akan bisa mengembalikannya!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, hapus!'
+    });
+  
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:8080/users/${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`,
+            'Content-Type': 'application/json',
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error('Gagal menghapus pengguna');
+        }
+  
+        Swal.fire('Dihapus!', 'Pengguna telah dihapus.', 'success');
+        fetchUsers();
+      } catch (error) {
+        console.error('Kesalahan saat menghapus pengguna:', error);
+        Swal.fire('Error!', 'Terjadi masalah saat menghapus pengguna.', 'error');
+      }
+    }
   };
 
   const fetchUsers = async () => {
