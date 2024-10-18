@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import EditUserModal from './form-edit-user';
 
 const Dashboard = () => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState('Dashboard');
   const [users, setUsers] = useState([]); 
   const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
@@ -16,8 +19,18 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     document.cookie = 'access_token=; Max-Age=0; path=/'; 
-
     router.push('/login');
+  };
+
+  const handleEdit = (userId) => {
+    const user = users.find(user => user.id === userId);
+    setSelectedUser(user); 
+    setIsModalOpen(true); 
+  };
+
+  const handleSave = async (updatedUser) => {
+    console.log('Updating user:', updatedUser);
+    fetchUsers();
   };
 
   const fetchUsers = async () => {
@@ -65,7 +78,7 @@ const Dashboard = () => {
               key={item.name}
               onClick={() => {
                 if (item.name === 'Logout') {
-                  item.action(); 
+                  item.action();
                 } else {
                   handleMenuClick(item.name);
                 }
@@ -103,13 +116,14 @@ const Dashboard = () => {
                 {loading ? (
                   <p>Loading...</p>
                 ) : (
-                    <table className="min-w-full bg-white border border-gray-300">
+                  <table className="min-w-full bg-white border border-gray-300">
                     <thead>
                       <tr className="bg-gray-100">
                         <th className="py-2 px-4 border-b border-gray-300 text-left">No</th>
                         <th className="py-2 px-4 border-b border-gray-300 text-left">Email User</th>
                         <th className="py-2 px-4 border-b border-gray-300 text-left">Nama User</th>
                         <th className="py-2 px-4 border-b border-gray-300 text-left">Role</th>
+                        <th className="py-2 px-4 border-b border-gray-300 text-left">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -119,6 +133,16 @@ const Dashboard = () => {
                           <td className="py-2 px-4 border-b border-gray-300">{user.email}</td>
                           <td className="py-2 px-4 border-b border-gray-300">{user.name}</td>
                           <td className="py-2 px-4 border-b border-gray-300">{user.role}</td>
+                          <td className="py-2 px-4 border-b border-gray-300">
+                            {/* Tombol Edit */}
+                            <button onClick={() => handleEdit(user.id)} className="text-blue-600 hover:text-blue-800">
+                                <i className="fas fa-edit"></i> {/* Ikon edit Font Awesome */}
+                            </button>
+                            {/* Tombol Hapus */}
+                            <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-800 ml-4">
+                                <i className="fas fa-trash"></i> {/* Ikon hapus Font Awesome */}
+                            </button>
+                            </td>
                         </tr>
                       ))}
                     </tbody>
@@ -126,17 +150,16 @@ const Dashboard = () => {
                 )}
               </div>
             )}
-            {activeMenu === 'Settings' && (
-              <p>Ini adalah halaman Pengaturan.</p>
-            )}
-            {activeMenu === 'Analytics' && (
-              <p>Ini adalah halaman Analytics.</p>
-            )}
-            {activeMenu === 'Logout' && (
-              <p>Anda telah keluar dari aplikasi.</p>
-            )}
           </div>
         </div>
+
+        {/* Modal Edit Pengguna */}
+        <EditUserModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          userData={selectedUser || {}}
+          onSave={handleSave}
+        />
       </main>
     </div>
   );
