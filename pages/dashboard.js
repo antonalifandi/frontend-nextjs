@@ -4,31 +4,29 @@ import { useRouter } from 'next/router';
 const Dashboard = () => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState('Dashboard');
-  const [users, setUsers] = useState([]); // State untuk menyimpan data pengguna
-  const [loading, setLoading] = useState(false); // State untuk mengatur loading
+  const [users, setUsers] = useState([]); 
+  const [loading, setLoading] = useState(false);
 
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
     if (menu === 'Master Data Users') {
-      fetchUsers(); // Panggil fungsi untuk mengambil data pengguna saat menu dipilih
+      fetchUsers(); 
     }
   };
 
   const handleLogout = () => {
-    // Hapus token dari cookies
-    document.cookie = 'access_token=; Max-Age=0; path=/'; // Menghapus cookie
+    document.cookie = 'access_token=; Max-Age=0; path=/'; 
 
-    // Redirect ke halaman login
     router.push('/login');
   };
 
   const fetchUsers = async () => {
-    setLoading(true); // Mengatur loading menjadi true
+    setLoading(true); 
     try {
       const response = await fetch('http://localhost:8080/users/master-data', {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`, // Mengambil token dari cookie
+          'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`, 
           'Content-Type': 'application/json',
         },
       });
@@ -38,11 +36,11 @@ const Dashboard = () => {
       }
 
       const data = await response.json();
-      setUsers(data); // Simpan data pengguna ke state
+      setUsers(data); 
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
-      setLoading(false); // Mengatur loading menjadi false setelah selesai
+      setLoading(false); 
     }
   };
 
@@ -51,7 +49,7 @@ const Dashboard = () => {
     { name: 'Master Data Users', icon: '👤' },
     { name: 'Settings', icon: '⚙️' },
     { name: 'Analytics', icon: '📊' },
-    { name: 'Logout', icon: '🚪', action: handleLogout }, // Tambahkan fungsi logout di sini
+    { name: 'Logout', icon: '🚪', action: handleLogout }, 
   ];
 
   return (
@@ -67,7 +65,7 @@ const Dashboard = () => {
               key={item.name}
               onClick={() => {
                 if (item.name === 'Logout') {
-                  item.action(); // Panggil fungsi logout jika Logout diklik
+                  item.action(); 
                 } else {
                   handleMenuClick(item.name);
                 }
