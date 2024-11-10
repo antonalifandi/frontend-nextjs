@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import EditUserModal from './form-edit-user';
 import Swal from 'sweetalert2';

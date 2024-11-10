@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useRouter } from 'next/router';
 import Cookie from 'js-cookie';
 import Swal from 'sweetalert2';
+import Link from 'next/link';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -97,7 +98,7 @@ const Login = () => {
                     </button>
                 </form>
                 <p className="mt-4 text-sm text-center text-gray-600">
-                    Belum punya akun? <a href="/register" className="text-blue-600 hover:underline">Daftar di sini</a>
+                    Belum punya akun? <Link href="/register" className="text-blue-600 hover:underline">Daftar di sini</Link>
                 </p>
             </div>
         </div>

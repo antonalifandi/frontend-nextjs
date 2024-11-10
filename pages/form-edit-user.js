@@ -41,10 +41,10 @@ const EditUserModal = ({ isOpen, onClose, userData, onSave }) => {
       };
 
       
-      const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('jwt='))
-        ?.split('=')[1]; 
+      // const token = document.cookie
+      //   .split('; ')
+      //   .find(row => row.startsWith('jwt='))
+      //   ?.split('=')[1]; 
 
       try {
         const response = await fetch(`http://localhost:8080/users/${userData.id}`, {

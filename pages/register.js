@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2'; 
+import Link from 'next/link';
 
 const Register = () => {
     const [email, setEmail] = useState('');
@@ -99,8 +100,9 @@ const Register = () => {
                     </button>
                 </form>
                 <p className="mt-4 text-sm text-center text-gray-600">
-                    Sudah punya akun? <a href="/login" className="text-blue-600 hover:underline">Masuk di sini</a>
+                    Sudah punya akun? <Link href="/login" className="text-blue-600 hover:underline">Masuk di sini</Link>
                 </p>
+
             </div>
         </div>
     );
