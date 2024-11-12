@@ -1,85 +1,67 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2'; // Import SweetAlert
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const EditUserModal = ({ isOpen, onClose, userData, onSave }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
 
   useEffect(() => {
-    // Update local state when userData changes
     if (userData) {
-      setEmail(userData.email || '');
-      setPassword(userData.password || '');
-      setName(userData.name || '');
-      setRole(userData.role || '');
+      setEmail(userData.email || "");
+      setPassword(userData.password || "");
+      setName(userData.name || "");
+      setRole(userData.role || "");
     }
   }, [userData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Show SweetAlert for confirmation
     const result = await Swal.fire({
-      title: 'Konfirmasi',
-      text: "Apakah Anda yakin ingin menyimpan perubahan?",
-      icon: 'warning',
+      title: "Confirmation",
+      text: "Are you sure you want to save the changes?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      cancelButtonText: 'Batal',
-      confirmButtonText: 'Ya, simpan!',
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Yes, save it!",
     });
 
     if (result.isConfirmed) {
-      const updatedUser = {
-        email,
-        password,
-        name,
-        role,
-      };
-
-      
-      // const token = document.cookie
-      //   .split('; ')
-      //   .find(row => row.startsWith('jwt='))
-      //   ?.split('=')[1]; 
+      const updatedUser = { email, password, name, role };
 
       try {
-        const response = await fetch(`http://localhost:8080/users/${userData.id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`,
-          },
-          body: JSON.stringify(updatedUser),
-        });
+        const response = await fetch(
+          `http://localhost:8080/users/${userData.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${
+                document.cookie.split("access_token=")[1]
+              }`,
+            },
+            body: JSON.stringify(updatedUser),
+          }
+        );
 
         if (!response.ok) {
-          throw new Error('Failed to update user');
+          throw new Error("Failed to update user");
         }
 
         const result = await response.json();
-        console.log('User updated successfully:', result);
+        console.log("User updated successfully:", result);
 
         onSave(updatedUser);
-
         onClose();
 
-        Swal.fire(
-          'Berhasil!',
-          'User berhasil diperbarui.',
-          'success'
-        );
-
+        Swal.fire("Success!", "User successfully updated.", "success");
       } catch (error) {
-        console.error('Error updating user:', error);
-        Swal.fire(
-          'Error!',
-          'Gagal memperbarui user.',
-          'error'
-        );
+        console.error("Error updating user:", error);
+        Swal.fire("Error!", "Failed to update user.", "error");
       }
     }
   };
@@ -128,7 +110,8 @@ const EditUserModal = ({ isOpen, onClose, userData, onSave }) => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="border border-gray-300 p-2 rounded w-full"
-              required>
+              required
+            >
               <option value="USER">USER</option>
               <option value="ADMIN">ADMIN</option>
             </select>
@@ -139,13 +122,13 @@ const EditUserModal = ({ isOpen, onClose, userData, onSave }) => {
               onClick={onClose}
               className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 transition duration-200 ease-in-out transform hover:bg-gray-400 active:bg-gray-600"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
               className="bg-blue-600 text-white px-4 py-2 rounded transition duration-200 ease-in-out transform hover:bg-blue-700 active:bg-blue-800"
             >
-              Simpan
+              Save
             </button>
           </div>
         </form>

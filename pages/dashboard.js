@@ -1,201 +1,62 @@
-import { useState } from 'react';
-import { useRouter } from 'next/router';
-import EditUserModal from './form-edit-user';
-import Swal from 'sweetalert2';
+import { useState } from "react";
+import { useRouter } from "next/router";
+import Image from "next/image";
+import Sidebar from "../src/app/components/sidebar";
+import Footer from "../src/app/components/footer";
 
 const Dashboard = () => {
   const router = useRouter();
-  const [activeMenu, setActiveMenu] = useState('Dashboard');
-  const [users, setUsers] = useState([]); 
+  const [activeMenu, setActiveMenu] = useState("Dashboard");
   const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
-  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
-    if (menu === 'Master Data Users') {
-      fetchUsers(); 
-    }
   };
 
   const handleLogout = () => {
-    document.cookie = 'access_token=; Max-Age=0; path=/'; 
-    router.push('/login');
+    setLoading(true);
+    setTimeout(() => {
+      document.cookie = "access_token=; Max-Age=0; path=/";
+      setLoading(false);
+      router.push("/login");
+    }, 1500);
   };
-
-  const handleEdit = (userId) => {
-    const user = users.find(user => user.id === userId);
-    setSelectedUser(user); 
-    setIsModalOpen(true); 
-  };
-
-  const handleSave = async (updatedUser) => {
-    console.log('Updating user:', updatedUser);
-    fetchUsers();
-  };
-
-  const handleDelete = async (userId) => {
-    const result = await Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: "Anda tidak akan bisa mengembalikannya!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Ya, hapus!'
-    });
-  
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(`http://localhost:8080/users/${userId}`, {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`,
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error('Gagal menghapus pengguna');
-        }
-  
-        Swal.fire('Dihapus!', 'Pengguna telah dihapus.', 'success');
-        fetchUsers();
-      } catch (error) {
-        console.error('Kesalahan saat menghapus pengguna:', error);
-        Swal.fire('Error!', 'Terjadi masalah saat menghapus pengguna.', 'error');
-      }
-    }
-  };
-
-  const fetchUsers = async () => {
-    setLoading(true); 
-    try {
-      const response = await fetch('http://localhost:8080/users/master-data', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${document.cookie.split('access_token=')[1]}`, 
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-
-      const data = await response.json();
-      setUsers(data); 
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    } finally {
-      setLoading(false); 
-    }
-  };
-
-  const menuItems = [
-    { name: 'Dashboard', icon: '🏠' },
-    { name: 'Master Data Users', icon: '👤' },
-    { name: 'Settings', icon: '⚙️' },
-    { name: 'Analytics', icon: '📊' },
-    { name: 'Logout', icon: '🚪', action: handleLogout }, 
-  ];
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-blue-600 text-white">
-        <div className="h-16 flex items-center justify-center font-bold text-2xl border-b border-blue-800">
-          MyApp
-        </div>
-        <nav className="mt-4">
-          {menuItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => {
-                if (item.name === 'Logout') {
-                  item.action();
-                } else {
-                  handleMenuClick(item.name);
-                }
-              }}
-              className={`flex items-center w-full p-4 text-left hover:bg-blue-500 transition ${
-                activeMenu === item.name ? 'bg-blue-700' : ''
-              }`}
-            >
-              <span className="text-lg mr-3">{item.icon}</span>
-              <span className="text-lg">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <main className="flex-1 p-8">
-        <header className="flex justify-between items-center bg-white shadow-md p-4 rounded-md">
-          <h1 className="text-2xl font-semibold text-gray-800">Welcome, User!</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-gray-600">Notifications</span>
-            <span className="text-gray-600">Profile</span>
-          </div>
-        </header>
-
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">{activeMenu}</h2>
-          <div className="bg-white shadow-md rounded-lg p-6">
-            {/* Tempat konten sesuai menu yang aktif */}
-            {activeMenu === 'Dashboard' && (
-              <p>Ini adalah halaman Dashboard utama!</p>
-            )}
-            {activeMenu === 'Master Data Users' && (
-              <div>
-                {loading ? (
-                  <p>Loading...</p>
-                ) : (
-                  <table className="min-w-full bg-white border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="py-2 px-4 border-b border-gray-300 text-left">No</th>
-                        <th className="py-2 px-4 border-b border-gray-300 text-left">Email User</th>
-                        <th className="py-2 px-4 border-b border-gray-300 text-left">Nama User</th>
-                        <th className="py-2 px-4 border-b border-gray-300 text-left">Role</th>
-                        <th className="py-2 px-4 border-b border-gray-300 text-left">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {users.map((user, index) => (
-                        <tr key={user.id} className="hover:bg-gray-50">
-                          <td className="py-2 px-4 border-b border-gray-300">{index + 1}</td>
-                          <td className="py-2 px-4 border-b border-gray-300">{user.email}</td>
-                          <td className="py-2 px-4 border-b border-gray-300">{user.name}</td>
-                          <td className="py-2 px-4 border-b border-gray-300">{user.role}</td>
-                          <td className="py-2 px-4 border-b border-gray-300">
-                            {/* Tombol Edit */}
-                            <button onClick={() => handleEdit(user.id)} className="text-blue-600 hover:text-blue-800">
-                                <i className="fas fa-edit"></i> {/* Ikon edit Font Awesome */}
-                            </button>
-                            {/* Tombol Hapus */}
-                            <button onClick={() => handleDelete(user.id)} className="text-red-600 hover:text-red-800 ml-4">
-                                <i className="fas fa-trash"></i> {/* Ikon hapus Font Awesome */}
-                            </button>
-                            </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            )}
+    <div className="flex flex-col h-screen">
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70 z-50">
+          <div className="flex flex-col items-center">
+            {/* Logo di tengah */}
+            {/* <Image
+              src="/images/logo-bening-guru-semesta.png"
+              alt="Loading Logo"
+              width={100}
+              height={100}
+            /> */}
+            {/* Spinner */}
+            <div className="mt-4 w-16 h-16 border-4 border-t-4 border-white border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
-
-        {/* Modal Edit Pengguna */}
-        <EditUserModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          userData={selectedUser || {}}
-          onSave={handleSave}
+      )}
+      <div
+        className={`flex flex-1 overflow-hidden ${
+          loading ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
+        <Sidebar
+          activeMenu={activeMenu}
+          handleMenuClick={handleMenuClick}
+          handleLogout={handleLogout}
         />
-      </main>
+        <main className="flex-1 overflow-auto flex flex-col bg-gray-50">
+          <div className="flex justify-between mb-6 bg-white p-6 rounded-md shadow-sm">
+            <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+          </div>
+          <div className="flex-1 mb-6 p-6"></div>
+          <Footer />
+        </main>
+      </div>
     </div>
   );
 };
