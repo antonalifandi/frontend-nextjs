@@ -1,5 +1,5 @@
 import React from "react";
-const UserTable = ({ users, loading, handleEdit, handleDelete }) => {
+const UserTable = ({ users, loading, handleDelete }) => {
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
       {loading ? (

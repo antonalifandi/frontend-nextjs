@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import Dashboard from "./dashboard";
-import Login from "./login";
+import dynamic from 'next/dynamic';
+
+const Dashboard = dynamic(() => import("./dashboard"), { ssr: false });
+const Login = dynamic(() => import("./login"), { ssr: false });
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -19,15 +15,9 @@ const App = () => {
   }, []);
 
   return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={isLoggedIn ? <Dashboard /> : <Navigate to="/login" />}
-        />
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </Router>
+    <div>
+      {isLoggedIn ? <Dashboard /> : <Login />}
+    </div>
   );
 };
 

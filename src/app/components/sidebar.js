@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-const Sidebar = ({ activeMenu, handleMenuClick, handleLogout }) => {
+const Sidebar = ({ handleMenuClick, handleLogout }) => {
   const router = useRouter();
 
   const menuItems = [
