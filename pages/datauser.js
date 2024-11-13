@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Sidebar from "../src/app/components/sidebar";
 import UserTable from "../src/app/components/UserTable";
@@ -15,8 +15,11 @@ const Datausers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const getAccessToken = () => {
-    const token = document.cookie.split("access_token=")[1];
-    return token ? token.split(";")[0] : null;
+    if (typeof document !== "undefined") {
+      const token = document.cookie.split("access_token=")[1];
+      return token ? token.split(";")[0] : null;
+    }
+    return null;
   };
 
   const handleMenuClick = (menu) => {
@@ -35,7 +38,7 @@ const Datausers = () => {
     }, 1500);
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     const token = getAccessToken();
     if (!token) {
@@ -62,7 +65,7 @@ const Datausers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
@@ -99,7 +102,6 @@ const Datausers = () => {
 
         if (response.ok) {
           Swal.fire("Deleted!", "The user has been deleted.", "success");
-
           setLoading(true);
 
           setTimeout(() => {
@@ -111,7 +113,11 @@ const Datausers = () => {
         }
       } catch (error) {
         console.error("Error deleting user:", error);
-        Swal.fire("Error!", "There was an issue deleting the user.", "error");
+        Swal.fire(
+          "Error",
+          "An error occurred while deleting the user.",
+          "error"
+        );
       }
     }
   };
@@ -149,7 +155,7 @@ const Datausers = () => {
     if (activeMenu === "Datausers") {
       fetchUsers();
     }
-  }, [activeMenu]);
+  }, [fetchUsers, activeMenu]);
 
   return (
     <div className="flex flex-col h-screen">
@@ -162,7 +168,9 @@ const Datausers = () => {
         </div>
       )}
       <div
-        className={`flex flex-1 overflow-hidden ${loading ? "opacity-50 pointer-events-none" : ""}`}
+        className={`flex flex-1 overflow-hidden ${
+          loading ? "opacity-50 pointer-events-none" : ""
+        }`}
       >
         <Sidebar
           activeMenu={activeMenu}
@@ -171,7 +179,9 @@ const Datausers = () => {
         />
         <main className="flex-1 overflow-auto flex flex-col bg-gray-50">
           <div className="flex justify-between mb-6 bg-white p-6 rounded-md shadow-sm">
-            <h1 className="text-3xl font-bold text-gray-800">Master Data Users</h1>
+            <h1 className="text-3xl font-bold text-gray-800">
+              Master Data Users
+            </h1>
           </div>
           <div className="flex-1 mb-6 p-6">
             <UserTable

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import Image from "next/image";
 import Sidebar from "../src/app/components/sidebar";
 import Footer from "../src/app/components/footer";
 
