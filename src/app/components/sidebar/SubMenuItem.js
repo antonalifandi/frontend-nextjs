@@ -1,4 +1,3 @@
-import { FaUsers } from "react-icons/fa"; 
 
 const SubMenuItem = ({ sub, router }) => {
   const isActive = (path) => router.pathname === path;

@@ -31,6 +31,12 @@ const Sidebar = ({ handleMenuClick, handleLogout }) => {
           action: () => router.push("/master-data/user"),
           path: "/master-data/user",
         },
+        {
+          name: "Visi Misi",
+          icon: "FaPencilAlt",
+          action: () => router.push("/master-data/visi-misi"),
+          path: "/master-data/visi-misi",
+        },
       ],
     },
     {

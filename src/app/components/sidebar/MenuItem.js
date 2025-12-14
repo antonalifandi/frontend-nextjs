@@ -4,6 +4,8 @@ import {
   FaChevronUp,
   FaHome,
   FaUsers,
+  FaPencilAlt,
+  FaDatabase,
   FaSignOutAlt,
   FaCog,
 } from "react-icons/fa";
@@ -12,6 +14,8 @@ import SubMenuItem from "./SubMenuItem";
 const icons = {
   FaHome: <FaHome />,
   FaUsers: <FaUsers />,
+  FaPencilAlt: <FaPencilAlt/>,
+  FaDatabase: <FaDatabase />,
   FaSignOutAlt: <FaSignOutAlt />,
   FaCog: <FaCog />,
 };
