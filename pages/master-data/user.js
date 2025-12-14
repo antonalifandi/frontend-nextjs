@@ -5,6 +5,7 @@ import UserTable from "./components/UserTable";
 import EditUserModal from "../master-data/components/EditUserModal";
 import AddUserModal from "../master-data/components/AddUserModal";
 import { useAuth } from "../../src/app/context/AuthContext";
+import Layout from "../../src/app/components/layout/Layout";
 import Swal from "sweetalert2";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -187,42 +188,26 @@ const Datausers = () => {
   }, [fetchUsers, activeMenu]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <Layout handleMenuClick={handleMenuClick} handleLogout={handleLogout}>
       {loading && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-70 z-50">
-          <div className="flex flex-col items-center">
-            {/* Spinner */}
-            <div className="mt-4 w-16 h-16 border-4 border-t-4 border-white border-t-transparent rounded-full animate-spin"></div>
-          </div>
+          <div className="w-16 h-16 border-4 border-t-4 border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
       )}
-      <div
-        className={`flex flex-1 overflow-hidden ${
-          loading ? "opacity-50 pointer-events-none" : ""
-        }`}
-      >
-        <Sidebar
-          activeMenu={activeMenu}
-          handleMenuClick={handleMenuClick}
-          handleLogout={handleLogout}
-        />
-        <main className="flex-1 overflow-auto flex flex-col bg-gray-50">
-          <div className="flex justify-between mb-6 bg-white p-6 rounded-md shadow-sm">
-            <h1 className="text-3xl font-bold text-gray-800">
-              Master Data User
-            </h1>
-          </div>
-          <div className="flex-1 mb-6 p-6">
-            <UserTable
-              users={users}
-              handleEdit={handleEdit}
-              handleDelete={handleDelete}
-              handleAdd={() => setIsAddModalOpen(true)}
-            />
-          </div>
-        </main>
+
+      {/* Konten utama */}
+      <div className="flex-1 overflow-auto flex flex-col p-6">
+        <div className="flex-1 mb-6">
+          <UserTable
+            users={users}
+            handleEdit={handleEdit}
+            handleDelete={handleDelete}
+            handleAdd={() => setIsAddModalOpen(true)}
+          />
+        </div>
       </div>
 
+      {/* Modals */}
       {isModalOpen && (
         <EditUserModal
           isOpen={isModalOpen}
@@ -231,7 +216,6 @@ const Datausers = () => {
           onClose={() => setIsModalOpen(false)}
         />
       )}
-
       {isAddModalOpen && (
         <AddUserModal
           isOpen={isAddModalOpen}
@@ -239,7 +223,7 @@ const Datausers = () => {
           onClose={() => setIsAddModalOpen(false)}
         />
       )}
-    </div>
+    </Layout>
   );
 };
 
