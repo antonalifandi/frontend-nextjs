@@ -1,16 +1,17 @@
 import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Sidebar from "../../src/app/components/sidebar";
-import UserTable from "../../src/app/components/UserTable";
-import EditUserModal from "../../src/app/components/EditUserModal";
-import AddUserModal from "../../src/app/components/AddUserModal";
+import Sidebar from "../../src/app/components/sidebar/index";
+import UserTable from "./components/UserTable";
+import EditUserModal from "../master-data/components/EditUserModal";
+import AddUserModal from "../master-data/components/AddUserModal";
+import { useAuth } from "../../src/app/context/AuthContext";
 import Swal from "sweetalert2";
 
 const Datausers = () => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState("Datausers");
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { loading, handleLogout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -30,22 +31,12 @@ const Datausers = () => {
     }
   };
 
-  const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      document.cookie = "access_token=; Max-Age=0; path=/";
-      setLoading(false);
-      router.push("/login");
-    }, 1500);
-  };
-
     const fetchUsers = useCallback(async () => {
       const startTime = Date.now();
-      setLoading(true);
       const token = getAccessToken();
       if (!token) {
         alert("Token is missing. Please login again.");
-        router.push("/login");
+        router.push("/auth/login");
         return;
       }
 
@@ -67,11 +58,7 @@ const Datausers = () => {
         const elapsed = Date.now() - startTime;
         const minLoading = 400;
         const remaining = minLoading - elapsed;
-        if (remaining > 0) {
-          setTimeout(() => setLoading(false), remaining);
-        } else {
-          setLoading(false);
-        }
+        if (remaining > 0) setTimeout(() => {}, remaining);
       }
     }, [router]);
 

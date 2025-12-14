@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Sidebar from "../src/app/components/sidebar";
+import Sidebar from "../src/app/components/sidebar/index";
+import { useAuth } from "../src/app/context/AuthContext"; 
 
 
 const Dashboard = () => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState("Dashboard");
-  const [loading, setLoading] = useState(false);
+  const { loading, handleLogout } = useAuth(); 
   const [visiMisi, setVisiMisi] = useState(null);
 
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
-  };
-
-  const handleLogout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      document.cookie = "access_token=; Max-Age=0; path=/";
-      setLoading(false);
-      router.push("/login");
-    }, 1500);
   };
 
   useEffect(() => {
