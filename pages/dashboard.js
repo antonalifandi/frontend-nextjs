@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import Sidebar from "../src/app/components/sidebar/index";
 import { useAuth } from "../src/app/context/AuthContext"; 
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const Dashboard = () => {
   const router = useRouter();
@@ -17,9 +18,10 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchVisiMisi = async () => {
       try {
-        const response = await fetch("http://localhost:8080/visi-misi");
-        const data = await response.json();
-        setVisiMisi(data);
+       const response = await fetch(`${API_URL}/visi-misi`);
+       if (!response.ok) throw new Error("Failed to fetch Visi Misi");
+       const data = await response.json();
+       setVisiMisi(data);
       } catch (error) {
         console.error("Error fetching Visi Misi:", error);
       }

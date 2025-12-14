@@ -73,7 +73,7 @@ const UserTable = ({ users, loading, handleDelete, handleEdit, handleAdd }) => {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      {/* 🔍 Left: Search */}
+      {/* Left: Search */}
       <Input
         placeholder="Search email, nama, role..."
         value={search}
@@ -84,7 +84,7 @@ const UserTable = ({ users, loading, handleDelete, handleEdit, handleAdd }) => {
         className="max-w-sm"
       />
 
-      {/* Right: Page size & Add */}
+      {/* Page size & Add */}
       <div className="flex items-center gap-3">
         <select
           value={pageSize}

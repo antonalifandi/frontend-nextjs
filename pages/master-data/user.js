@@ -7,11 +7,13 @@ import AddUserModal from "../master-data/components/AddUserModal";
 import { useAuth } from "../../src/app/context/AuthContext";
 import Swal from "sweetalert2";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const Datausers = () => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState("Datausers");
   const [users, setUsers] = useState([]);
-  const { loading, handleLogout } = useAuth();
+  const { loading, setLoading, handleLogout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -31,36 +33,33 @@ const Datausers = () => {
     }
   };
 
-    const fetchUsers = useCallback(async () => {
-      const startTime = Date.now();
-      const token = getAccessToken();
-      if (!token) {
-        alert("Token is missing. Please login again.");
-        router.push("/auth/login");
-        return;
-      }
+  const fetchUsers = useCallback(async () => {
+    const startTime = Date.now();
+    const token = getAccessToken();
+    if (!token) {
+      alert("Token is missing. Please login again.");
+      router.push("/auth/login");
+      return;
+    }
 
-      try {
-        const response = await fetch(
-          "http://localhost:8080/users/master-data",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+    try {
+      const response = await fetch(`${API_URL}/users/master-data`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        if (!response.ok) throw new Error("Failed to fetch users");
+      if (!response.ok) throw new Error("Failed to fetch users");
 
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        const elapsed = Date.now() - startTime;
-        const minLoading = 400;
-        const remaining = minLoading - elapsed;
-        if (remaining > 0) setTimeout(() => {}, remaining);
-      }
-    }, [router]);
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      const elapsed = Date.now() - startTime;
+      const minLoading = 400;
+      const remaining = minLoading - elapsed;
+      if (remaining > 0) setTimeout(() => {}, remaining);
+    }
+  }, [router]);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
@@ -88,11 +87,9 @@ const Datausers = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:8080/users/${userId}`, {
+        const response = await fetch(`${API_URL}/users/${userId}`, {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
@@ -121,7 +118,7 @@ const Datausers = () => {
     const token = getAccessToken();
 
     try {
-      const response = await fetch("http://localhost:8080/users/register", {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -143,7 +140,6 @@ const Datausers = () => {
     }
   };
 
-
   const handleSave = async (updatedUser) => {
     const token = getAccessToken();
 
@@ -153,24 +149,21 @@ const Datausers = () => {
       return;
     }
 
-    // ❗ HAPUS password jika kosong
+    // HAPUS password jika kosong
     const payload = { ...updatedUser };
     if (!payload.password) {
       delete payload.password;
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/users/${updatedUser.id}`,
-        {
-          method: "PATCH", 
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(`${API_URL}/users/${updatedUser.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
       if (!response.ok) {
         const err = await response.json();

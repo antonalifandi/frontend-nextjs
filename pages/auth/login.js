@@ -5,6 +5,8 @@ import Cookie from "js-cookie";
 import Swal from "sweetalert2";
 import Link from "next/link";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await axios.post("http://localhost:8080/users/login", {
+      const response = await axios.post(`${API_URL}/users/login`, {
         email,
         password,
       });

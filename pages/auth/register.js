@@ -12,14 +12,15 @@ const Register = () => {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/users/register",
+       const response = await axios.post(`${API_URL}/users/register`, 
         {
           email,
           password,
