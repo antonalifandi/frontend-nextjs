@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import Cookie from "js-cookie";
 import MenuItem from "./MenuItem";
 
-const Sidebar = ({ handleMenuClick, handleLogout }) => {
+const Sidebar = ({ handleMenuClick, handleLogout, isOpen, setIsOpen }) => {
   const router = useRouter();
   const [role, setRole] = useState(null);
 
@@ -51,10 +51,26 @@ const Sidebar = ({ handleMenuClick, handleLogout }) => {
   );
 
   return (
-    <aside className="w-72 bg-white text-gray-800 flex flex-col shadow-lg rounded-lg transform transition-all duration-300 ease-in-out hover:shadow-3xl">
-      <div className="h-16 mt-4 flex items-center justify-start font-bold text-2xl text-gray-600 px-6 py-4">
-        <Image src="/images/himauntika.png" alt="Logo" width={60} height={60} />
-        <span className="ml-4">HIMAUNTIKA</span>
+    <aside
+      className={`
+    fixed top-0 left-0 h-screen
+    bg-white text-gray-800 shadow-lg z-50
+    transition-all duration-300
+    ${isOpen ? "w-72" : "w-20"}
+  `}
+    >
+      <div className="h-16 mt-4 flex items-center font-bold text-2xl text-gray-600 px-4 overflow-hidden">
+        <Image src="/images/himauntika.png" alt="Logo" width={40} height={40} />
+
+        <span
+          className={`
+      ml-4 whitespace-nowrap
+      transition-all duration-300 ease-in-out
+      ${isOpen ? "opacity-100 max-w-xs" : "opacity-0 max-w-0"}
+    `}
+        >
+          HIMAUNTIKA
+        </span>
       </div>
       <nav className="mt-4">
         {filteredMenuItems.map((item) => (
@@ -63,6 +79,8 @@ const Sidebar = ({ handleMenuClick, handleLogout }) => {
             item={item}
             handleMenuClick={handleMenuClick}
             router={router}
+            isSidebarOpen={isOpen}
+            setSidebarOpen={setIsOpen}
           />
         ))}
       </nav>
