@@ -26,6 +26,8 @@ const Login = () => {
       if (response.status === 201) {
         Cookie.set("access_token", response.data.access_token, { expires: 7 });
 
+        Cookie.set("role", response.data.user.role);
+        console.log("datauser:", response.data.user.role);
         Swal.fire({
           icon: "success",
           title: "Login Successful!",

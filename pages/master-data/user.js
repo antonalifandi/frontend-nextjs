@@ -1,9 +1,9 @@
 import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Sidebar from "../src/app/components/sidebar";
-import UserTable from "../src/app/components/UserTable";
-import Footer from "../src/app/components/footer";
-import EditUserModal from "../src/app/components/EditUserModal";
+import Sidebar from "../../src/app/components/sidebar";
+import UserTable from "../../src/app/components/UserTable";
+import EditUserModal from "../../src/app/components/EditUserModal";
+import AddUserModal from "../../src/app/components/AddUserModal";
 import Swal from "sweetalert2";
 
 const Datausers = () => {
@@ -12,6 +12,7 @@ const Datausers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
   const getAccessToken = () => {
@@ -38,34 +39,41 @@ const Datausers = () => {
     }, 1500);
   };
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    const token = getAccessToken();
-    if (!token) {
-      alert("Token is missing. Please login again.");
-      router.push("/login");
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:8080/users/master-data", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch users");
+    const fetchUsers = useCallback(async () => {
+      const startTime = Date.now();
+      setLoading(true);
+      const token = getAccessToken();
+      if (!token) {
+        alert("Token is missing. Please login again.");
+        router.push("/login");
+        return;
       }
 
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+      try {
+        const response = await fetch(
+          "http://localhost:8080/users/master-data",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (!response.ok) throw new Error("Failed to fetch users");
+
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        const elapsed = Date.now() - startTime;
+        const minLoading = 400;
+        const remaining = minLoading - elapsed;
+        if (remaining > 0) {
+          setTimeout(() => setLoading(false), remaining);
+        } else {
+          setLoading(false);
+        }
+      }
+    }, [router]);
 
   const handleEdit = (user) => {
     setSelectedUser(user);
@@ -122,32 +130,73 @@ const Datausers = () => {
     }
   };
 
-  const handleSave = async (user) => {
+  const handleAddUser = async (newUser) => {
     const token = getAccessToken();
-    if (!token) {
-      alert("Token is missing. Please login again.");
-      router.push("/login");
-      return;
-    }
 
     try {
-      const response = await fetch(`http://localhost:8080/users/${user.id}`, {
-        method: "PUT",
+      const response = await fetch("http://localhost:8080/users/register", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify(newUser),
       });
 
-      if (response.ok) {
-        fetchUsers();
-        setIsModalOpen(false);
-      } else {
-        throw new Error("Failed to save user");
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Failed to create user");
       }
+
+      Swal.fire("Success", "User created successfully", "success");
+      setIsAddModalOpen(false);
+      fetchUsers();
     } catch (error) {
-      console.error("Error saving user:", error);
+      Swal.fire("Error", error.message, "error");
+    }
+  };
+
+
+  const handleSave = async (updatedUser) => {
+    const token = getAccessToken();
+
+    if (!token) {
+      Swal.fire("Error", "Token missing, please login again", "error");
+      router.push("/login");
+      return;
+    }
+
+    // ❗ HAPUS password jika kosong
+    const payload = { ...updatedUser };
+    if (!payload.password) {
+      delete payload.password;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/users/${updatedUser.id}`,
+        {
+          method: "PATCH", 
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const err = await response.json();
+        console.error("Update error:", err);
+        throw new Error(err.message || "Update failed");
+      }
+
+      Swal.fire("Success", "User updated successfully", "success");
+      setIsModalOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", error.message, "error");
     }
   };
 
@@ -180,7 +229,7 @@ const Datausers = () => {
         <main className="flex-1 overflow-auto flex flex-col bg-gray-50">
           <div className="flex justify-between mb-6 bg-white p-6 rounded-md shadow-sm">
             <h1 className="text-3xl font-bold text-gray-800">
-              Master Data Users
+              Master Data User
             </h1>
           </div>
           <div className="flex-1 mb-6 p-6">
@@ -188,17 +237,26 @@ const Datausers = () => {
               users={users}
               handleEdit={handleEdit}
               handleDelete={handleDelete}
+              handleAdd={() => setIsAddModalOpen(true)}
             />
           </div>
-          <Footer />
         </main>
       </div>
 
       {isModalOpen && (
         <EditUserModal
+          isOpen={isModalOpen}
           user={selectedUser}
           onSave={handleSave}
           onClose={() => setIsModalOpen(false)}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <AddUserModal
+          isOpen={isAddModalOpen}
+          onSave={handleAddUser}
+          onClose={() => setIsAddModalOpen(false)}
         />
       )}
     </div>

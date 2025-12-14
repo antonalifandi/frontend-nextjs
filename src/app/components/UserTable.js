@@ -1,64 +1,203 @@
-import React from "react";
-const UserTable = ({ users, loading, handleDelete }) => {
-  return (
-    <div className="bg-white shadow-md rounded-lg p-6">
-      {loading ? (
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Trash2, Pencil } from "lucide-react";
+
+
+const PAGE_SIZES = [10, 25, 50, 100];
+
+const UserTable = ({ users, loading, handleDelete, handleEdit, handleAdd }) => {
+  const [sortBy, setSortBy] = useState("email");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  // Handle sort click
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortBy(column);
+      setSortOrder("asc");
+    }
+  };
+
+  const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
+
+  // Filter search
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) =>
+      [user.email, user.name, user.role]
+        .join(" ")
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+  }, [users, search]);
+
+  // Sort A-Z / Z-A
+  const sortedUsers = useMemo(() => {
+    return [...filteredUsers].sort((a, b) => {
+      const valueA = a[sortBy]?.toString().toLowerCase();
+      const valueB = b[sortBy]?.toString().toLowerCase();
+
+      if (valueA < valueB) return sortOrder === "asc" ? -1 : 1;
+      if (valueA > valueB) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [filteredUsers, sortBy, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredUsers.length / pageSize);
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return sortedUsers.slice(start, start + pageSize);
+  }, [sortedUsers, page, pageSize]);
+
+  if (loading) {
+    return (
+      <div className="bg-white shadow rounded-lg p-6">
         <p>Loading...</p>
-      ) : (
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="py-2 px-4 border-b border-gray-300 text-left">
-                No
-              </th>
-              <th className="py-2 px-4 border-b border-gray-300 text-left">
-                Email User
-              </th>
-              <th className="py-2 px-4 border-b border-gray-300 text-left">
-                Nama User
-              </th>
-              <th className="py-2 px-4 border-b border-gray-300 text-left">
-                Role
-              </th>
-              <th className="py-2 px-4 border-b border-gray-300 text-left">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user, index) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {index + 1}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {user.email}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {user.name}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {user.role}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {/* <button
-                    onClick={() => handleEdit(user.id)}
-                    className="text-blue-500 hover:text-blue-700"
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      {/* 🔍 Left: Search */}
+      <Input
+        placeholder="Search email, nama, role..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1);
+        }}
+        className="max-w-sm"
+      />
+
+      {/* Right: Page size & Add */}
+      <div className="flex items-center gap-3">
+        <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+            setPage(1);
+          }}
+          className="border rounded-md px-3 py-2 text-sm"
+        >
+          {PAGE_SIZES.map((size) => (
+            <option key={size} value={size}>
+              Show {size}
+            </option>
+          ))}
+        </select>
+
+        <Button onClick={handleAdd}>+ Add Users</Button>
+      </div>
+
+      {/* Table */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>No</TableHead>
+
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("email")}
+            >
+              Email {sortBy === "email" && (sortOrder === "asc" ? "▲" : "▼")}
+            </TableHead>
+
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("name")}
+            >
+              Nama {sortBy === "name" && (sortOrder === "asc" ? "▲" : "▼")}
+            </TableHead>
+
+            <TableHead
+              className="cursor-pointer"
+              onClick={() => handleSort("role")}
+            >
+              Role {sortBy === "role" && (sortOrder === "asc" ? "▲" : "▼")}
+            </TableHead>
+
+            <TableHead className="text-center">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+
+        <TableBody>
+          {paginatedUsers.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center text-gray-500">
+                Data tidak ditemukan
+              </TableCell>
+            </TableRow>
+          ) : (
+            paginatedUsers.map((user, index) => (
+              <TableRow key={user.id}>
+                <TableCell>{(page - 1) * pageSize + index + 1}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.role}</TableCell>
+                <TableCell className="text-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(user)}
                   >
-                    <i className="fas fa-edit h-5 w-5"></i>
-                  </button> */}
-                  <button
+                    <Pencil className="h-4 w-4 text-blue-500" />
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => handleDelete(user.id)}
-                    className="ml-2 text-red-500 hover:text-red-700"
                   >
-                    <i className="fas fa-trash h-5 w-5"></i> {/* Ikon delete */}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+                    <Trash2 className="h-4 w-4 text-red-500" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between text-sm">
+        <p>
+          Page {page} of {totalPages || 1}
+        </p>
+
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+          >
+            Previous
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page === totalPages || totalPages === 0}
+            onClick={() => setPage((p) => p + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

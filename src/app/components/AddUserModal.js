@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
 
-const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
+const AddUserModal = ({ isOpen, onClose, onSave }) => {
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -11,18 +11,7 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
     role: "USER",
   });
 
-  useEffect(() => {
-    if (user) {
-      setForm({
-        email: user.email || "",
-        password: "",
-        name: user.name || "",
-        role: user.role || "USER",
-      });
-    }
-  }, [user]);
-
-  if (!isOpen || !user) return null;
+  if (!isOpen) return null;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,15 +22,15 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
 
     const result = await Swal.fire({
       title: "Confirmation",
-      text: "Save changes to this user?",
-      icon: "warning",
+      text: "Create new user?",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Save",
+      confirmButtonText: "Create",
       cancelButtonText: "Cancel",
     });
 
     if (result.isConfirmed) {
-      onSave({ ...user, ...form });
+      onSave(form);
     }
   };
 
@@ -50,14 +39,14 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
       <div className="bg-white rounded-lg p-6 w-full max-w-md z-10">
-        <h2 className="text-xl font-semibold mb-4">Edit User</h2>
+        <h2 className="text-xl font-semibold mb-4">Add User</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             name="email"
+            placeholder="Email"
             value={form.email}
             onChange={handleChange}
-            placeholder="Email"
             className="w-full border p-2 rounded"
             required
           />
@@ -65,17 +54,18 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
           <input
             name="password"
             type="password"
+            placeholder="Password"
             value={form.password}
             onChange={handleChange}
-            placeholder="Password (optional)"
             className="w-full border p-2 rounded"
+            required
           />
 
           <input
             name="name"
+            placeholder="Name"
             value={form.name}
             onChange={handleChange}
-            placeholder="Name"
             className="w-full border p-2 rounded"
             required
           />
@@ -102,7 +92,7 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded"
             >
-              Save
+              Create
             </button>
           </div>
         </form>
@@ -111,4 +101,4 @@ const EditUserModal = ({ isOpen, onClose, user, onSave }) => {
   );
 };
 
-export default EditUserModal;
+export default AddUserModal;
